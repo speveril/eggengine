@@ -19,7 +19,6 @@ int _main(std::string cmdLine) {
 // Implementation of EggCore
 
 EggCore::EggCore() {
-	Log::write("Egg core created.");
 	screen = 0;
 }
 
