@@ -1,5 +1,8 @@
-declare void @testCall()
 declare void @log(i8 *)
+declare void @logNumber(double)
+
+declare void @testCall()
+declare double @addOne(double)
 
 @.STR0 = internal constant [13 x i8] c"Hello world\0A\00"
 
@@ -16,6 +19,9 @@ EntryBlock:
   
   %s = getelementptr [13 x i8]* @.STR0, i64 0, i64 0
   call void @log(i8 * %s)
+  
+  %n = call double @addOne(double 5.0)
+  call void @logNumber(double %n)
   
   ret void
 }

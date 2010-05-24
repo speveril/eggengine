@@ -40,6 +40,20 @@ SCRIPT_FUNCTION(testCall) {
 	return nullGV;
 }
 
+SCRIPT_FUNCTION(addOne) {
+	GenericValue returnValue;
+	returnValue.DoubleVal = args[0].DoubleVal + 1;
+
+	Log::debug("addOne() executed. Returning %g + 1 = %g", args[0].DoubleVal, returnValue.DoubleVal);
+	
+	return returnValue;
+}
+
+SCRIPT_FUNCTION(writeNumberToLog) {
+	Log::write("%g", args[0].DoubleVal);
+	return nullGV;
+}
+
 SCRIPT_FUNCTION(writeStringToLog) {
 	Log::write((char *)args[0].PointerVal);
 	return nullGV;
@@ -50,8 +64,17 @@ SCRIPT_FUNCTION(writeStringToLog) {
 void ScriptEngine::registerEggLibraryFunctions() {
 	std::vector<ScriptEngine::type> *arglist;
 
+	// functions with signature (void)
 	registerFunction(testCall, "testCall", VoidType);
 	
+	// functions with signature (pointer)
 	arglist = new std::vector<ScriptEngine::type>(1, PointerType);
 	registerFunction(writeStringToLog, "log", VoidType, arglist);
+	delete arglist;
+
+	// functions with signature (number)
+	arglist = new std::vector<ScriptEngine::type>(1, NumberType);
+	registerFunction(writeNumberToLog, "logNumber", VoidType, arglist);
+	registerFunction(addOne, "addOne", NumberType, arglist);
+	delete arglist;
 }

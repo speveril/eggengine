@@ -1,0 +1,7 @@
+*~
+bin/*.pdb
+bin/*.exp
+bin/*.lib
+bin/*.ilk
+bin/log
+eggengine/scratch/*.*
