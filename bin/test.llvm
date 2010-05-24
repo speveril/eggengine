@@ -1,0 +1,21 @@
+declare void @testCall()
+declare void @log(i8 *)
+
+@.STR0 = internal constant [13 x i8] c"Hello world\0A\00"
+
+define i32 @test2(i32) {
+EntryBlock:
+  %r = add i32 %0, 1                              ; <i32> [#uses=1]
+  call void @testCall()
+  ret i32 %r
+}
+
+define void @main() {
+EntryBlock:
+  call void @testCall()
+  
+  %s = getelementptr [13 x i8]* @.STR0, i64 0, i64 0
+  call void @log(i8 * %s)
+  
+  ret void
+}
