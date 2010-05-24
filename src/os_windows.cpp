@@ -28,6 +28,8 @@ typedef struct Win32EggWindowInternalsStruct {
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow) {
 	__instance = hInst;
 
+	Log::write("Blert.");
+
 	return _main(std::string(lpCmdLine));
 }
 
