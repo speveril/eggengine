@@ -51,7 +51,7 @@ void Log::error(const char *msg, ...) {
 	vsprintf_s(outstr, LOG_MAX_MSGLEN, msg, args);
 	va_end(args);
 
-	Log::write("ERROR: %s", outstr);
+	Log::write("** ERROR: %s", outstr);
 }
 
 #ifdef DEBUG

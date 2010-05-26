@@ -124,6 +124,10 @@ bool ScriptEngine::loadFile(const char *filename) {
 	}
 
 	Module *m = ParseBitcodeFile(buf, *i->context);
+	if (!m) { 
+		Log::error("Couldn't parse bitcode file %s.", filename); 
+		return false;
+	}
 
 	Log::debug("Link with main module.");
 	loadChunk(m);
