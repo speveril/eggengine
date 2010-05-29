@@ -1,8 +1,6 @@
 #include "core.h"
 #include "render.h"
 
-#include "corona/corona.h"
-
 #ifdef DEBUG
 void checkGLErrors(const char *msg) {
 	int e = glGetError();
@@ -21,9 +19,6 @@ RenderEngine::RenderEngine(EggWindow *s) {
 	else win = core->getScreen();
 
 	win->prepareRender();
-
-	Log::debug(" >> OpenGL %s", glGetString(GL_VERSION));
-	Log::debug(" >> Corona %s", corona::GetVersion());
 
 	if (!win) {
 		Log::error("Could not find a window for this rendering context.");
@@ -50,9 +45,7 @@ void RenderEngine::debug() {
 
 	std::vector<Layer *> *stack = new std::vector<Layer *>();
 
-	corona::File *f = corona::OpenFile("test3.png", false);
-	if (!f) Log::error("Could not open image file.");
-	corona::Image *img = corona::OpenImage(f);
+	RenderImage *img = new RenderImage("test3.png");
 
 	double h = (double)win->getHeight();
 	double w = (double)win->getWidth();
@@ -172,7 +165,7 @@ void Rect::render() {
 	glVertex2d(hw, -hh);
 }
 
-Sprite::Sprite(corona::Image *img, double x, double y, double w, double h):Rect(x,y,w,h), _img(img) {
+Sprite::Sprite(RenderImage *img, double x, double y, double w, double h):Rect(x,y,w,h), _img(img) {
 	glEnable(GL_TEXTURE_2D);
 
 	glGenTextures(1, &_texture);
@@ -185,26 +178,31 @@ Sprite::Sprite(corona::Image *img, double x, double y, double w, double h):Rect(
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-	corona::PixelFormat pf = _img->getFormat();
-	   
 	int numComponents, glformat;
 
-	if (pf == corona::PF_R8G8B8A8) { /**< RGBA, channels have eight bits of precision */
-		Log::debug("Pixel format on sprite image is RGBA.");
-		numComponents = 4; glformat = GL_RGBA;
-	} else if (pf == corona::PF_R8G8B8) { /**< RGB, channels have eight bits of precision  */
-		Log::debug("Pixel format on sprite image is RGB.");
-		numComponents = 3; glformat = GL_RGB;
-	} else if (pf == corona::PF_B8G8R8A8) { /**< BGRA, channels have eight bits of precision */
-		Log::debug("Pixel format on sprite image is BGRA.");
-		numComponents = 4; glformat = GL_BGRA_EXT;
-	} else if (pf == corona::PF_B8G8R8) { /**< BGR, channels have eight bits of precision  */
-		Log::debug("Pixel format on sprite image is BGR.");
-		numComponents = 3; glformat = GL_BGR_EXT;
-	} else if (pf == corona::PF_I8) { /**< Palettized, 8-bit indices into palette      */
-		Log::debug("Pixel format on sprite image is paletted.");
-		Log::error("Paletted images not supported yet.");
-		return;
+	switch (_img->getPixelFormat()) {
+		case RenderImage::RGBA:
+			Log::debug("Pixel format on sprite image is RGBA.");
+			numComponents = 4; glformat = GL_RGBA;
+		break;
+		case RenderImage::RGB:
+			Log::debug("Pixel format on sprite image is RGB.");
+			numComponents = 3; glformat = GL_RGB;
+		break;
+		case RenderImage::BGRA:
+			Log::debug("Pixel format on sprite image is BGRA.");
+			numComponents = 4; glformat = GL_BGRA_EXT;
+		break;
+		case RenderImage::BGR:
+			Log::debug("Pixel format on sprite image is BGR.");
+			numComponents = 3; glformat = GL_BGR_EXT;
+		break;
+		case RenderImage::I8:
+			Log::debug("Pixel format on sprite image is paletted.");
+			Log::error("Paletted images not supported yet.");
+		default:
+			Log::error("Bad image passed to Sprite.");
+			return;
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, numComponents, _img->getWidth(), _img->getHeight(), 0, glformat, GL_UNSIGNED_BYTE, _img->getPixels());

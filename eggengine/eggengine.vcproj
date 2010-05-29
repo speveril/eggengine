@@ -222,6 +222,10 @@
 				Name="render"
 				>
 				<File
+					RelativePath="..\src\render_Image.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\src\render_OpenGL.cpp"
 					>
 				</File>
@@ -246,6 +250,10 @@
 			</File>
 			<File
 				RelativePath="..\src\render.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\render_image.h"
 				>
 			</File>
 			<File

@@ -56,9 +56,9 @@ ScriptEngine::ScriptEngine() {
 	i->module = new Module("global", *i->context);
 	i->exec = EngineBuilder(i->module).create();
 
-	if (i->module->getPointerSize() == i->module->Pointer32)
+	if (i->module->getPointerSize() == Module::Pointer32)
 		i->pointerType = (Type *)Type::getInt32Ty(*i->context);
-	else if (i->module->getPointerSize() == i->module->Pointer64)
+	else if (i->module->getPointerSize() == Module::AnyPointerSize || i->module->getPointerSize() == Module::Pointer64)
 		i->pointerType = (Type *)Type::getInt64Ty(*i->context);
 
 	//debug();
@@ -84,14 +84,14 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 
 	Type *r = 0;
 	switch (returnType) {
-		case VoidType: r = (Type *)Type::getVoidTy(*i->context); break;
-		case NumberType: r = (Type *)Type::getDoubleTy(*i->context); break;
-		case PointerType: r = i->pointerType; break;
+		case VoidType: r = (Type *)Type::getVoidTy(*i->context); Log::debug(" -> returns void"); break;
+		case NumberType: r = (Type *)Type::getDoubleTy(*i->context); Log::debug(" -> returns number"); break;
+		case PointerType: r = i->pointerType; Log::debug(" -> returns pointer"); break;
 		default: break;
 	}
 
 	FunctionType *ft = 0;
-
+	bool variadic = false;
 	if (argc < 1) {
 		ft = FunctionType::get(r, false);
 	} else {
@@ -100,17 +100,18 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 
 		va_start(args, argc);
 		for (unsigned int x = 0; x < argc; x++) {
+			Log::debug(" arg %d", x);
 			switch ( va_arg(args, ScriptEngine::type) ) {
-				case VoidType: p.push_back(Type::getVoidTy(*i->context)); break;
-				case NumberType: p.push_back(Type::getDoubleTy(*i->context)); break;
+				case VoidType: p.push_back(Type::getVoidTy(*i->context)); Log::debug(" -> void"); break;
+				case NumberType: p.push_back(Type::getDoubleTy(*i->context)); Log::debug(" -> number"); break;
+				case PointerType: p.push_back(i->pointerType); Log::debug(" -> pointer"); break;
 				default: break;
 			}
 		}
 		va_end(args);
 
-		ft = FunctionType::get(r, p, false);
+		ft = FunctionType::get(r, p, variadic);
 	}
-
 	Function *f = Function::Create(ft, Function::ExternalLinkage, name, i->module);
 
 	Log::debug("Done registering function '%s'", name);

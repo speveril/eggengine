@@ -2,7 +2,8 @@
 #define _EGG_RENDER_H
 
 #include <vector>
-#include "corona/corona.h"
+
+#include "render_image.h"
 
 class EggWindow;
 
@@ -46,10 +47,10 @@ public:
 class Sprite : public Rect {
 public:
 	unsigned int _texture;
-	corona::Image *_img;
+	RenderImage *_img;
 	double _tx, _ty, _tw, _th;
 
-	Sprite(corona::Image *img, double x, double y, double w, double h);
+	Sprite(RenderImage *img, double x, double y, double w, double h);
 	virtual void setFrame(unsigned int x, unsigned y) { _tx = x*_tw; _ty = x*_ty; }
 	virtual void setFrameDimensions(double w, double h) { _tw = w; _th = h; }
 	virtual void render();
@@ -79,8 +80,9 @@ public:
 	~RenderEngine();
 
 	void debug();
-
 	void render();
+
+	
 
 	// inline accessor methods
 	RenderStack *getRenderStack() { return currentStack; }

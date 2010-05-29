@@ -61,11 +61,61 @@ SCRIPT_FUNCTION(writeStringToLog) {
 	return nullGV;
 }
 
+// - Memory Management Functions -
+
+SCRIPT_FUNCTION(eggfunc_delete) {
+	delete args[0].PointerVal;
+	return nullGV;
+}
+
+// - Graphics Built In Functions -
+
+SCRIPT_FUNCTION(eggfunc_getResolutionX) {
+	GenericValue returnValue;
+	returnValue.DoubleVal = core->screen->getWidth();
+	return returnValue;
+}
+
+SCRIPT_FUNCTION(eggfunc_getResolutionY) {
+	GenericValue returnValue;
+	returnValue.DoubleVal = core->screen->getHeight();
+	return returnValue;
+}
+
+SCRIPT_FUNCTION(eggfunc_newRenderStack) {
+	GenericValue returnValue;
+	returnValue.PointerVal = new std::vector<Layer *>;
+	return returnValue;
+}
+
+SCRIPT_FUNCTION(eggfunc_setRenderStack) {
+	core->renderEngine->setRenderStack((RenderStack *)args[0].PointerVal);
+	return nullGV;
+}
+
+SCRIPT_FUNCTION(eggfunc_newLayer) {
+	GenericValue returnValue;
+	returnValue.PointerVal = new Layer(args[0].DoubleVal, args[1].DoubleVal, args[2].DoubleVal, args[3].DoubleVal);
+	return returnValue;
+}
+
+SCRIPT_FUNCTION(eggfunc_newSprite) {
+	return nullGV;
+}
+
 // ---
 
 void ScriptEngine::registerEggLibraryFunctions() {
-	registerFunction(testCall, "testCall", VoidType, 0);
+	registerFunction(testCall, "testCall", VoidType);
 	registerFunction(writeStringToLog, "log", VoidType, 1, PointerType);
 	registerFunction(writeNumberToLog, "logNumber", VoidType, 1, NumberType);
 	registerFunction(addOne, "addOne", NumberType, 1, NumberType);
+
+	registerFunction(eggfunc_delete, "delete", VoidType, 1, PointerType);
+
+	registerFunction(eggfunc_getResolutionX, "getResolutionX", NumberType);
+	registerFunction(eggfunc_getResolutionY, "getResolutionY", NumberType);
+	registerFunction(eggfunc_newRenderStack, "newRenderStack", PointerType);
+	registerFunction(eggfunc_setRenderStack, "setRenderStack", VoidType, 1, PointerType);
+	registerFunction(eggfunc_newLayer, "newLayer", PointerType, 4, NumberType, NumberType, NumberType, NumberType);
 }
