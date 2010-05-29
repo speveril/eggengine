@@ -91,9 +91,8 @@ void RenderEngine::debug() {
 	s->rotateTo(30);
 	lyr->elements.push_back(s);
 	stack->push_back(lyr);
-	stacks.push_back(stack);
 
-	currentStack = stacks[0];
+	currentStack = stack;
 
 	delete img;
 

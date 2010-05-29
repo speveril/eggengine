@@ -10,6 +10,8 @@
 #pragma warning(disable:4996)
 #pragma warning(disable:4800)
 
+#include <cstdarg>
+
 #include "core.h"
 #include "script.h"
 
@@ -71,6 +73,7 @@ ScriptEngine::~ScriptEngine() {
 	Log::debug("Done destroying LLVM ScriptEngine.");
 }
 
+/*
 bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::type returnType, std::vector<ScriptEngine::type> *args) {
 	Log::debug("Register scripting function '%s'", name);
 
@@ -110,6 +113,53 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 
 	return true;
 }
+*/
+
+bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::type returnType, unsigned int argc, ...) {
+	Log::debug("Register scripting function '%s'", name);
+
+	Internals *i = (Internals *)internals;
+	
+	std::string symbolName = "lle_X_";
+	symbolName += name;
+	sys::DynamicLibrary::AddSymbol(symbolName, func);
+
+	Type *r = 0;
+	switch (returnType) {
+		case VoidType: r = (Type *)Type::getVoidTy(*i->context); break;
+		case NumberType: r = (Type *)Type::getDoubleTy(*i->context); break;
+		case PointerType: r = i->pointerType; break;
+		default: break;
+	}
+
+	FunctionType *ft = 0;
+
+	if (argc < 1) {
+		ft = FunctionType::get(r, false);
+	} else {
+		std::vector<const Type*> p;
+		va_list args;
+
+		va_start(args, argc);
+		for (unsigned int x = 0; x < argc; x++) {
+			switch ( va_arg(args, ScriptEngine::type) ) {
+				case VoidType: p.push_back(Type::getVoidTy(*i->context)); break;
+				case NumberType: p.push_back(Type::getDoubleTy(*i->context)); break;
+				default: break;
+			}
+		}
+		va_end(args);
+
+		ft = FunctionType::get(r, p, false);
+	}
+
+	Function *f = Function::Create(ft, Function::ExternalLinkage, name, i->module);
+
+	Log::debug("Done registering function '%s'", name);
+
+	return true;
+}
+
 
 bool ScriptEngine::loadFile(const char *filename) {
 	Internals *i = (Internals *)internals;

@@ -35,6 +35,8 @@ using namespace llvm;
 
 static GenericValue nullGV;
 
+// - Testing Built In Functions -
+
 SCRIPT_FUNCTION(testCall) {
 	Log::debug("testCall() has executed.");
 	return nullGV;
@@ -62,19 +64,8 @@ SCRIPT_FUNCTION(writeStringToLog) {
 // ---
 
 void ScriptEngine::registerEggLibraryFunctions() {
-	std::vector<ScriptEngine::type> *arglist;
-
-	// functions with signature (void)
-	registerFunction(testCall, "testCall", VoidType);
-	
-	// functions with signature (pointer)
-	arglist = new std::vector<ScriptEngine::type>(1, PointerType);
-	registerFunction(writeStringToLog, "log", VoidType, arglist);
-	delete arglist;
-
-	// functions with signature (number)
-	arglist = new std::vector<ScriptEngine::type>(1, NumberType);
-	registerFunction(writeNumberToLog, "logNumber", VoidType, arglist);
-	registerFunction(addOne, "addOne", NumberType, arglist);
-	delete arglist;
+	registerFunction(testCall, "testCall", VoidType, 0);
+	registerFunction(writeStringToLog, "log", VoidType, 1, PointerType);
+	registerFunction(writeNumberToLog, "logNumber", VoidType, 1, NumberType);
+	registerFunction(addOne, "addOne", NumberType, 1, NumberType);
 }

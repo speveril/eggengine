@@ -14,7 +14,7 @@ public:
 	ScriptEngine();
 	~ScriptEngine();
 
-	bool registerFunction(void *callback, const char *name, ScriptEngine::type returnType, std::vector<ScriptEngine::type> *args = 0);
+	bool registerFunction(void *func, const char *name, ScriptEngine::type returnType, unsigned int argc, ...);
 	bool loadFile(const char *filename);
 	bool loadChunk(void *chunk);
 	

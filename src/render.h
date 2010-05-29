@@ -67,11 +67,12 @@ public:
 	void render();
 };
 
+typedef std::vector<Layer*> RenderStack;
+
 class RenderEngine {
 private:
 	EggWindow *win;
-	std::vector<std::vector<Layer *> *> stacks;
-	std::vector<Layer *> *currentStack;
+	RenderStack *currentStack;
 
 public:
 	RenderEngine(EggWindow *s = 0);
@@ -80,6 +81,10 @@ public:
 	void debug();
 
 	void render();
+
+	// inline accessor methods
+	RenderStack *getRenderStack() { return currentStack; }
+	void setRenderStack(RenderStack *stack) { currentStack = stack; }
 };
 
 #endif

@@ -75,9 +75,6 @@ public:
 // ...
 class EggCore { // implemented in core.cpp
 private:
-	EggWindow *screen;
-	ScriptEngine *scriptEngine;
-	RenderEngine *renderEngine;
 	double lastFrameTime;
 	struct {
 		int xRes, yRes;
@@ -86,6 +83,10 @@ private:
 	} config;
 
 public:
+	EggWindow *screen;
+	ScriptEngine *scriptEngine;
+	RenderEngine *renderEngine;
+
 	EggCore();
 	~EggCore();
 
