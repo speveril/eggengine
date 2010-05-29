@@ -73,48 +73,6 @@ ScriptEngine::~ScriptEngine() {
 	Log::debug("Done destroying LLVM ScriptEngine.");
 }
 
-/*
-bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::type returnType, std::vector<ScriptEngine::type> *args) {
-	Log::debug("Register scripting function '%s'", name);
-
-	Internals *i = (Internals *)internals;
-	
-	std::string symbolName = "lle_X_";
-	symbolName += name;
-	sys::DynamicLibrary::AddSymbol(symbolName, func);
-
-	Type *r = 0;
-	switch (returnType) {
-		case VoidType: r = (Type *)Type::getVoidTy(*i->context); break;
-		case NumberType: r = (Type *)Type::getDoubleTy(*i->context); break;
-		case PointerType: r = i->pointerType; break;
-		default: break;
-	}
-
-	FunctionType *ft = 0;
-	if (!args) {
-		ft = FunctionType::get(r, false);
-	} else {
-		std::vector<ScriptEngine::type>::iterator it;
-		std::vector<const Type*> p;
-		for (it = args->begin(); it != args->end(); it++) {
-			switch (*it) {
-				case VoidType: p.push_back(Type::getVoidTy(*i->context)); break;
-				case NumberType: p.push_back(Type::getDoubleTy(*i->context)); break;
-				default: break;
-			}
-		}
-		ft = FunctionType::get(r, p, false);
-	}
-
-	Function *f = Function::Create(ft, Function::ExternalLinkage, name, i->module);
-
-	Log::debug("Done registering function '%s'", name);
-
-	return true;
-}
-*/
-
 bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::type returnType, unsigned int argc, ...) {
 	Log::debug("Register scripting function '%s'", name);
 
