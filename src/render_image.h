@@ -4,6 +4,7 @@
 class RenderImage { 
 private:
 	void *internals;
+	char *_filename;
 
 public:
 	typedef enum pixelformat { UNKNOWN, RGBA, RGB, BGRA, BGR, I8 } PixelFormat;
@@ -14,6 +15,7 @@ public:
 	int getWidth();
 	int getHeight();
 	void *getPixels();
+	char *getFilename();
 	PixelFormat getPixelFormat();
 };
 

@@ -74,8 +74,6 @@ ScriptEngine::~ScriptEngine() {
 }
 
 bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::type returnType, unsigned int argc, ...) {
-	Log::debug("Register scripting function '%s'", name);
-
 	Internals *i = (Internals *)internals;
 	
 	std::string symbolName = "lle_X_";
@@ -84,9 +82,9 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 
 	Type *r = 0;
 	switch (returnType) {
-		case VoidType: r = (Type *)Type::getVoidTy(*i->context); Log::debug(" -> returns void"); break;
-		case NumberType: r = (Type *)Type::getDoubleTy(*i->context); Log::debug(" -> returns number"); break;
-		case PointerType: r = i->pointerType; Log::debug(" -> returns pointer"); break;
+		case VoidType: r = (Type *)Type::getVoidTy(*i->context); break;
+		case NumberType: r = (Type *)Type::getDoubleTy(*i->context); break;
+		case PointerType: r = i->pointerType; break;
 		default: break;
 	}
 
@@ -100,11 +98,10 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 
 		va_start(args, argc);
 		for (unsigned int x = 0; x < argc; x++) {
-			Log::debug(" arg %d", x);
 			switch ( va_arg(args, ScriptEngine::type) ) {
-				case VoidType: p.push_back(Type::getVoidTy(*i->context)); Log::debug(" -> void"); break;
-				case NumberType: p.push_back(Type::getDoubleTy(*i->context)); Log::debug(" -> number"); break;
-				case PointerType: p.push_back(i->pointerType); Log::debug(" -> pointer"); break;
+				case VoidType: p.push_back(Type::getVoidTy(*i->context)); break;
+				case NumberType: p.push_back(Type::getDoubleTy(*i->context)); break;
+				case PointerType: p.push_back(i->pointerType); break;
 				default: break;
 			}
 		}
@@ -114,7 +111,7 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 	}
 	Function *f = Function::Create(ft, Function::ExternalLinkage, name, i->module);
 
-	Log::debug("Done registering function '%s'", name);
+	Log::debug("Registered function '%s'", name);
 
 	return true;
 }

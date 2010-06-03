@@ -5,7 +5,7 @@
 void checkGLErrors(const char *msg) {
 	int e = glGetError();
 	if (e != GL_NO_ERROR) {
-		Log::error("GL Error %0x: %s", msg);
+		Log::error("OpenGL Error (%0x) %s, %s", e, gluErrorString(e), msg);
 	}
 }
 #else
@@ -29,6 +29,8 @@ RenderEngine::RenderEngine(EggWindow *s) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+	currentStack = new RenderStack();
+
 	debug();
 
 	checkGLErrors("RenderEngine constructor");
@@ -43,7 +45,8 @@ RenderEngine::~RenderEngine() {
 void RenderEngine::debug() {
 	Log::debug("Do RenderEngine debug calls.");
 
-	std::vector<Layer *> *stack = new std::vector<Layer *>();
+	//std::vector<Layer *> *stack = new std::vector<Layer *>();
+	RenderStack *stack = getRenderStack();
 
 	RenderImage *img = new RenderImage("test3.png");
 
@@ -75,12 +78,12 @@ void RenderEngine::debug() {
 
 	lyr = new Layer(0, 240, 0, 320);
 	Sprite *s = new Sprite(img, 100, 75, 64, 64);
-	s->setFrameDimensions(0.5, 0.5);
-	s->setFrame(1,1);
+	//s->setFrameDimensions(0.5, 0.5);
+	//s->setFrame(1,1);
 	lyr->elements.push_back(s);
 	s = new Sprite(img, 260, 150, 128, 128);
-	s->setFrameDimensions(0.5, 0.5);
-	s->setFrame(0,0);
+	//s->setFrameDimensions(0.5, 0.5);
+	//s->setFrame(0,0);
 	s->rotateTo(30);
 	lyr->elements.push_back(s);
 	stack->push_back(lyr);
@@ -97,9 +100,10 @@ void RenderEngine::render() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT);
+	checkGLErrors("frame setup");
 
 	// process current renderstack
-	if (currentStack) {
+	if (currentStack && currentStack->size() > 0) {
 		std::vector<Layer *>::iterator i;
 		for (i = currentStack->begin(); i != currentStack->end(); i++) {
 			(*i)->render();
@@ -121,10 +125,13 @@ void Layer::render() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	std::vector<RenderObject *>::iterator i;
-	for (i = elements.begin(); i != elements.end(); i++) {
+	if (elements.size() > 0) {
 		glClear(GL_DEPTH_BUFFER_BIT);
-		(*i)->fullrender();
+
+		std::vector<RenderObject *>::iterator i;
+		for (i = elements.begin(); i != elements.end(); i++) {
+			(*i)->fullrender();
+		}
 	}
 }
 
@@ -166,9 +173,18 @@ void Rect::render() {
 }
 
 Sprite::Sprite(RenderImage *img, double x, double y, double w, double h):Rect(x,y,w,h), _img(img) {
+	Log::debug("Creating sprite with image '%s' (%dx%d)", _img->getFilename(), _img->getWidth(), _img->getHeight());
+
+	// Currently this generates a new texture every single time we make a sprite. What it SHOULD do is check
+	// a texture cache of some sort so we're not producing duplicates. I'm thinking a map of filename -> texture
+	// number.
+
+	core->getScreen()->prepareRender();
 	glEnable(GL_TEXTURE_2D);
 
+	_texture = 0;
 	glGenTextures(1, &_texture);
+	checkGLErrors("creating sprite (generating texture name)");
 	glBindTexture(GL_TEXTURE_2D, _texture);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -182,26 +198,30 @@ Sprite::Sprite(RenderImage *img, double x, double y, double w, double h):Rect(x,
 
 	switch (_img->getPixelFormat()) {
 		case RenderImage::RGBA:
-			Log::debug("Pixel format on sprite image is RGBA.");
+			Log::debug("Pixel format in sprite image is RGBA.");
 			numComponents = 4; glformat = GL_RGBA;
 		break;
 		case RenderImage::RGB:
-			Log::debug("Pixel format on sprite image is RGB.");
+			Log::debug("Pixel format in sprite image is RGB.");
 			numComponents = 3; glformat = GL_RGB;
 		break;
 		case RenderImage::BGRA:
-			Log::debug("Pixel format on sprite image is BGRA.");
+			Log::debug("Pixel format in sprite image is BGRA.");
 			numComponents = 4; glformat = GL_BGRA_EXT;
 		break;
 		case RenderImage::BGR:
-			Log::debug("Pixel format on sprite image is BGR.");
+			Log::debug("Pixel format in sprite image is BGR.");
 			numComponents = 3; glformat = GL_BGR_EXT;
 		break;
 		case RenderImage::I8:
-			Log::debug("Pixel format on sprite image is paletted.");
+			Log::debug("Pixel format in sprite image is paletted.");
 			Log::error("Paletted images not supported yet.");
 		default:
 			Log::error("Bad image passed to Sprite.");
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glDisable(GL_TEXTURE_2D);
+			glDeleteTextures(1, &_texture);
+			_texture = 0;
 			return;
 	}
 
@@ -209,8 +229,12 @@ Sprite::Sprite(RenderImage *img, double x, double y, double w, double h):Rect(x,
 
 	glDisable(GL_TEXTURE_2D);
 
-	_tx = 0; _ty = 0;
-	_tw = 1; _th = 1;
+	Log::debug("Texture number: %u", _texture);
+
+	setFrameDimensions(1, 1);
+	setFrame(0, 0);
+
+	core->getScreen()->teardownRender();
 }
 
 void Sprite::fullrender() {

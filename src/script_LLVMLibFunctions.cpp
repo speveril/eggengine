@@ -43,12 +43,12 @@ SCRIPT_FUNCTION(testCall) {
 }
 
 SCRIPT_FUNCTION(addOne) {
-	GenericValue returnValue;
-	returnValue.DoubleVal = args[0].DoubleVal + 1;
+	GenericValue rv;
+	rv.DoubleVal = args[0].DoubleVal + 1;
 
-	Log::debug("addOne() executed. Returning %g + 1 = %g", args[0].DoubleVal, returnValue.DoubleVal);
+	Log::debug("addOne() executed. Returning %g + 1 = %g", args[0].DoubleVal, rv.DoubleVal);
 	
-	return returnValue;
+	return rv;
 }
 
 SCRIPT_FUNCTION(writeNumberToLog) {
@@ -71,21 +71,21 @@ SCRIPT_FUNCTION(eggfunc_delete) {
 // - Graphics Built In Functions -
 
 SCRIPT_FUNCTION(eggfunc_getResolutionX) {
-	GenericValue returnValue;
-	returnValue.DoubleVal = core->screen->getWidth();
-	return returnValue;
+	GenericValue rv;
+	rv.DoubleVal = core->screen->getWidth();
+	return rv;
 }
 
 SCRIPT_FUNCTION(eggfunc_getResolutionY) {
-	GenericValue returnValue;
-	returnValue.DoubleVal = core->screen->getHeight();
-	return returnValue;
+	GenericValue rv;
+	rv.DoubleVal = core->screen->getHeight();
+	return rv;
 }
 
 SCRIPT_FUNCTION(eggfunc_newRenderStack) {
-	GenericValue returnValue;
-	returnValue.PointerVal = new std::vector<Layer *>;
-	return returnValue;
+	GenericValue rv;
+	rv.PointerVal = new std::vector<Layer *>();
+	return rv;
 }
 
 SCRIPT_FUNCTION(eggfunc_setRenderStack) {
@@ -93,14 +93,52 @@ SCRIPT_FUNCTION(eggfunc_setRenderStack) {
 	return nullGV;
 }
 
+SCRIPT_FUNCTION(eggfunc_getRenderStack) {
+	GenericValue rv;
+	rv.PointerVal = core->renderEngine->getRenderStack();
+	return rv;
+}
+
+SCRIPT_FUNCTION(eggfunc_RenderStack_addLayer) {
+	RenderStack *stack = (RenderStack *)args[0].PointerVal;
+	stack->push_back((Layer *)args[1].PointerVal);
+	return nullGV;
+}
+
 SCRIPT_FUNCTION(eggfunc_newLayer) {
-	GenericValue returnValue;
-	returnValue.PointerVal = new Layer(args[0].DoubleVal, args[1].DoubleVal, args[2].DoubleVal, args[3].DoubleVal);
-	return returnValue;
+	GenericValue rv;
+	rv.PointerVal = new Layer(args[0].DoubleVal, args[1].DoubleVal, args[2].DoubleVal, args[3].DoubleVal);
+	return rv;
+}
+
+SCRIPT_FUNCTION(eggfunc_Layer_add) {
+	Layer *layer = (Layer *)args[0].PointerVal;
+	layer->elements.push_back((RenderObject *)args[1].PointerVal);
+	return nullGV;
+}
+
+SCRIPT_FUNCTION(eggfunc_newImage) {
+	GenericValue rv;
+	rv.PointerVal = new RenderImage((char *)args[0].PointerVal);
+	return rv;
+}
+
+SCRIPT_FUNCTION(eggfunc_Image_width) {
+	GenericValue rv;
+	rv.DoubleVal = ((RenderImage *)args[0].PointerVal)->getWidth();
+	return rv;
+}
+
+SCRIPT_FUNCTION(eggfunc_Image_height) {
+	GenericValue rv;
+	rv.DoubleVal = ((RenderImage *)args[0].PointerVal)->getHeight();
+	return rv;
 }
 
 SCRIPT_FUNCTION(eggfunc_newSprite) {
-	return nullGV;
+	GenericValue rv;
+	rv.PointerVal = new Sprite((RenderImage *)args[0].PointerVal, args[1].DoubleVal, args[2].DoubleVal, args[3].DoubleVal, args[4].DoubleVal);
+	return rv;
 }
 
 // ---
@@ -115,7 +153,18 @@ void ScriptEngine::registerEggLibraryFunctions() {
 
 	registerFunction(eggfunc_getResolutionX, "getResolutionX", NumberType);
 	registerFunction(eggfunc_getResolutionY, "getResolutionY", NumberType);
-	registerFunction(eggfunc_newRenderStack, "newRenderStack", PointerType);
+
+	registerFunction(eggfunc_getRenderStack, "getRenderStack", PointerType);
 	registerFunction(eggfunc_setRenderStack, "setRenderStack", VoidType, 1, PointerType);
+	registerFunction(eggfunc_newRenderStack, "newRenderStack", PointerType);
+	registerFunction(eggfunc_RenderStack_addLayer, "RenderStack_addLayer", VoidType, 2, PointerType, PointerType);
+
 	registerFunction(eggfunc_newLayer, "newLayer", PointerType, 4, NumberType, NumberType, NumberType, NumberType);
+	registerFunction(eggfunc_Layer_add, "Layer_add", VoidType, 2, PointerType, PointerType);
+
+	registerFunction(eggfunc_newImage, "newImage", PointerType, 1, PointerType);
+	registerFunction(eggfunc_Image_width, "Image_width", NumberType, 1, PointerType);
+	registerFunction(eggfunc_Image_height, "Image_height", NumberType, 1, PointerType);
+
+	registerFunction(eggfunc_newSprite, "newSprite", PointerType, 5, PointerType, NumberType, NumberType, NumberType, NumberType);
 }

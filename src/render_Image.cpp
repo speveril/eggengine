@@ -10,12 +10,14 @@ typedef struct CoronaRenderImageInternals {
 
 RenderImage::RenderImage(char *filename) {
 	internals = malloc(sizeof(Internals));
+	_filename = filename;
 
 	Internals *i = (Internals *)internals;
 
-	corona::File *f = corona::OpenFile("test3.png", false);
-	if (!f) Log::error("Could not open image file %s", filename);
+	corona::File *f = corona::OpenFile(filename, false);
+	if (!f) Log::error("Could not open image file '%s'", filename);
 	i->img = corona::OpenImage(f);
+	Log::debug("Loading image '%s' (%dx%d)", filename, getWidth(), getHeight());
 }
 
 RenderImage::~RenderImage() {
@@ -30,12 +32,16 @@ int RenderImage::getWidth() {
 
 int RenderImage::getHeight() {
 	Internals *i = (Internals *)internals;
-	return i->img->getWidth();
+	return i->img->getHeight();
 }
 
 void *RenderImage::getPixels() {
 	Internals *i = (Internals *)internals;
 	return i->img->getPixels();
+}
+
+char *RenderImage::getFilename() {
+	return _filename;
 }
 
 RenderImage::PixelFormat RenderImage::getPixelFormat() {
@@ -50,5 +56,4 @@ RenderImage::PixelFormat RenderImage::getPixelFormat() {
 			Log::error("Unknown pixel format in image.");
 			return UNKNOWN;
 	}
-
 }
