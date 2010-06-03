@@ -43,6 +43,7 @@ RenderEngine::~RenderEngine() {
 }
 
 void RenderEngine::debug() {
+	/*
 	Log::debug("Do RenderEngine debug calls.");
 
 	//std::vector<Layer *> *stack = new std::vector<Layer *>();
@@ -93,6 +94,7 @@ void RenderEngine::debug() {
 	delete img;
 
 	Log::debug("Done RenderEngine debug calls.");
+	*/
 }
 
 void RenderEngine::render() {
