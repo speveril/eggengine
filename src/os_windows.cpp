@@ -42,13 +42,19 @@ LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 		case WM_SIZE:
 			win->setWidth(LOWORD(lparam));
 			win->setHeight(HIWORD(lparam));
-			break;
+		break;
 		case WM_CLOSE:
 			if (windows.size() <= 1) core->stop();
-			break;
+		break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			break;
+		break;
+		case WM_KEYDOWN:
+			core->eventKeyDown((unsigned int)wparam);
+		break;
+		case WM_KEYUP:
+			core->eventKeyUp((unsigned int)wparam);
+		break;
 	}
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 };

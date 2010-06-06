@@ -18,7 +18,8 @@ public:
 	bool loadFile(const char *filename);
 	bool loadChunk(void *chunk);
 	
-	void callFunction(const char *name);
+	bool hasFunction(const char *name);
+	void callFunction(const char *name, unsigned int argc = 0, ...);
 
 	void registerEggLibraryFunctions();
 

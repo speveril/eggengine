@@ -69,9 +69,22 @@ void EggCore::tick() {
 		accum = 0.0;
 	}
 
+	eventUpdate(elapsed);
 	render();
 
 	screen->process();
+}
+
+void EggCore::eventKeyDown(unsigned int key) {
+	scriptEngine->callFunction("keydown", 1, (double)key);
+}
+
+void EggCore::eventKeyUp(unsigned int key) {
+	scriptEngine->callFunction("keyup", 1, (double)key);
+}
+
+void EggCore::eventUpdate(double dt) {
+	scriptEngine->callFunction("update", 1, dt);
 }
 
 void EggCore::render() {

@@ -93,6 +93,7 @@ bool ScriptEngine::registerFunction(void *func, const char *name, ScriptEngine::
 	if (argc < 1) {
 		ft = FunctionType::get(r, false);
 	} else {
+		variadic = true;
 		std::vector<const Type*> p;
 		va_list args;
 
@@ -154,14 +155,36 @@ bool ScriptEngine::loadChunk(void *chunk) {
 	return true;
 }
 
-void ScriptEngine::callFunction(const char *name) {
+bool ScriptEngine::hasFunction(const char *name) {
+	Internals *i = (Internals *)internals;
+
+	if (i->module->getFunction(name))
+		return true;
+	else
+		return false;
+}
+
+void ScriptEngine::callFunction(const char *name, unsigned int argc, ...) {
 	Internals *i = (Internals *)internals;
 
 	Function *f = i->module->getFunction(name);
-	std::vector<GenericValue> args;
 
 	if (f) {
+		std::vector<GenericValue> args;
+		
+		if (argc > 0) {
+			va_list argv;
+
+			va_start(argv, argc);
+			for (unsigned int x = 0; x < argc; x++) {
+				GenericValue v;
+				v.DoubleVal = (va_arg(argv, double)); // this might not work for anything other than doubles! hooray
+				args.push_back(v);
+			}
+			va_end(argv);
+		}
 		i->exec->runFunction(f, args);
+
 	} else {
 		Log::error("Tried to execute non-existent function '%s'.", name);
 	}

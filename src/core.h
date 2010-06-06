@@ -95,6 +95,10 @@ public:
 	void render();
 	void stop();
 
+	void eventKeyUp(unsigned int key);
+	void eventKeyDown(unsigned int key);
+	void eventUpdate(double dt);
+
 	void loadConfiguration(std::string filename);
 
 	double getTime() { return screen->getTime(); }

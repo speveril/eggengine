@@ -141,6 +141,27 @@ SCRIPT_FUNCTION(eggfunc_newSprite) {
 	return rv;
 }
 
+SCRIPT_FUNCTION(eggfunc_Sprite_getX) {
+	GenericValue rv;
+	Sprite *s = (Sprite *)args[0].PointerVal;
+	rv.DoubleVal = s->_x;
+	return rv;
+}
+
+SCRIPT_FUNCTION(eggfunc_Sprite_getY) {
+	GenericValue rv;
+	Sprite *s = (Sprite *)args[0].PointerVal;
+	rv.DoubleVal = s->_y;
+	return rv;
+}
+
+SCRIPT_FUNCTION(eggfunc_Sprite_setXY) {
+	Sprite *s = (Sprite *)args[0].PointerVal;
+	s->_x = args[1].DoubleVal;
+	s->_y = args[2].DoubleVal;
+	return nullGV;
+}
+
 // ---
 
 void ScriptEngine::registerEggLibraryFunctions() {
@@ -167,4 +188,7 @@ void ScriptEngine::registerEggLibraryFunctions() {
 	registerFunction(eggfunc_Image_height, "Image_height", NumberType, 1, PointerType);
 
 	registerFunction(eggfunc_newSprite, "newSprite", PointerType, 5, PointerType, NumberType, NumberType, NumberType, NumberType);
+	registerFunction(eggfunc_Sprite_getX, "Sprite_getX", NumberType, 1, PointerType);
+	registerFunction(eggfunc_Sprite_getY, "Sprite_getY", NumberType, 1, PointerType);
+	registerFunction(eggfunc_Sprite_setXY, "Sprite_setXY", VoidType, 3, PointerType, NumberType, NumberType);
 }
